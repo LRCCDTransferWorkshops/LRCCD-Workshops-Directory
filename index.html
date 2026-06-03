@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
   <style>
-    /* 1. BRANDING VARIABLES: ARC Official Colors */
+    /* BRANDING VARIABLES: ARC Official Colors */
     :root {
       --arc-blue: #004a99;
       --arc-red: #8e1104;
@@ -21,7 +21,6 @@
       color: #333;
     }
 
-    /* 2. HEADER: Clean, centered branding */
     .header-section {
       background-color: white;
       padding: 40px 20px;
@@ -35,7 +34,6 @@
       margin-bottom: 15px;
     }
 
-    /* 3. FILTER: Dropdown styling */
     .filter-wrapper {
       max-width: 500px;
       margin: 0 auto 40px;
@@ -47,7 +45,6 @@
       font-weight: 600;
     }
 
-    /* 4. WORKSHOP ROWS: The horizontal list items */
     .workshop-row {
       background: white;
       border-radius: 12px;
@@ -62,7 +59,6 @@
       transform: translateX(4px);
     }
 
-    /* LOGO AREA: Fixed frame ensures uniformity */
     .inst-branding {
       width: 180px;
       padding: 20px;
@@ -88,7 +84,6 @@
       object-fit: contain;
     }
 
-    /* DETAILS AREA: Workshop name, time, and tags */
     .workshop-details {
       padding: 25px 30px;
     }
@@ -115,7 +110,6 @@
       margin-left: 8px;
     }
 
-    /* ACTION AREA: Buttons on the right */
     .action-area {
       padding: 25px;
       background: #fafafa;
@@ -149,7 +143,6 @@
     }
     .btn-cal:hover { background-color: #eef4fb; }
 
-    /* 5. MOBILE OVERRIDES: Stacks the rows vertically on small screens */
     @media (max-width: 768px) {
       .workshop-row { flex-direction: column; }
       .inst-branding { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
@@ -165,11 +158,7 @@
     <div class="container">
       <img src="https://lh3.googleusercontent.com/d/1RVwQOqm0u2gHQQOnq-3-NrNJQoW41f8s" class="main-logo" alt="Los Rios Community Colleges Transfer Centers">
       <h1 class="fw-bold">Los Rios Transfer Workshop Series</h1>
-      <p class="text-muted mb-2">These workshops are meant to assist and inform students who are intending on transferring for 4-year degrees. Students can attend workshops facilitated by various universities that cover different aspects of transferring. We encourage any student to attend and learn more about the transfer process!</p>
-
-      <p class="text-secondary small" style="font-style: italic;">
-        <strong>Note:</strong> To help us improve this resource, students may be requested to provide feedback on this page.
-      </p>
+      <p class="text-muted mb-2">These workshops are meant to assist and inform students who are intending on transferring for 4-year degrees. Students can attend workshops facilitated by various universities that cover different aspects of transferring.</p>
     </div>
   </header>
 
@@ -178,7 +167,7 @@
     <div class="filter-wrapper">
       <select id="instFilter" class="form-select shadow-sm" onchange="filterList()">
         <option value="all">View All Institutions</option>
-        </select>
+      </select>
     </div>
 
     <div id="loadingStatus" class="text-center py-5">
@@ -186,8 +175,7 @@
       <p class="text-muted fw-semibold">Loading live workshop dashboard...</p>
     </div>
 
-    <div id="workshopList">
-      </div>
+    <div id="workshopList"></div>
 
     <div id="noResults" class="text-center py-5 d-none">
       <h5 class="text-muted">No workshops found for this selection.</h5>
@@ -196,30 +184,22 @@
   </div>
 
   <script>
-    // 1. PLACE YOUR NEW APPS SCRIPT EXEC/WEB APP URL BELOW:
+    // PASTE WEB APP URL DIRECTLY BELOW:
     const apiEndpoint = "https://script.google.com/macros/s/AKfycbwQa9lZQny5vomKlxKJ-lREhniDRKoODB_7oKLdX-m7hF7fIQholKibx8OT1bbO8qC2/exec";
 
-    // Fetch live feed from database upon client page execution
     document.addEventListener("DOMContentLoaded", () => {
       fetch(apiEndpoint)
-        .then(response => {
-          if (!response.ok) throw new Error("Network latency or authorization timeout.");
-          return response.json();
-        })
+        .then(response => response.json())
         .then(workshops => {
-          // Hide loading spinner
           document.getElementById('loadingStatus').classList.add('d-none');
-          
           const filterSelect = document.getElementById('instFilter');
           const listContainer = document.getElementById('workshopList');
           
           if (workshops.length === 0) {
             document.getElementById('noResults').classList.remove('d-none');
-            document.getElementById('noResults').innerHTML = '<h5 class="text-muted">No upcoming workshops scheduled at this time.</h5>';
             return;
           }
 
-          // Generate unique institutions list dynamically from JSON array
           const institutions = [...new Set(workshops.map(w => w.institution))].sort();
           institutions.forEach(inst => {
             const opt = document.createElement('option');
@@ -228,18 +208,18 @@
             filterSelect.appendChild(opt);
           });
 
-          // Render operational rows into the view layout container
           workshops.forEach(item => {
             let logoHTML = item.logo 
               ? `<img src="${item.logo}" class="inst-logo-small" alt="${item.institution}">`
               : `<span style="font-size: 0.9rem; color: #cbd5e0; font-weight: bold;">INSTITUTION</span>`;
 
+            // Clean data string names to prevent JavaScript string breaking bugs
+            const sanitizedLabel = `${item.institution} - ${item.name}`.replace(/'/g, "\\'");
+
             listContainer.innerHTML += `
               <div class="workshop-row shadow-sm workshop-item" data-inst="${item.institution}">
                 <div class="inst-branding">
-                  <div class="logo-frame">
-                    ${logoHTML}
-                  </div>
+                  <div class="logo-frame">${logoHTML}</div>
                 </div>
                 <div class="workshop-details flex-grow-1">
                   <h4 class="workshop-title">${item.name}</h4>
@@ -251,25 +231,19 @@
                   <p class="card-text text-secondary small mb-0">${item.desc}</p>
                 </div>
                 <div class="action-area">
-                  <a href="${item.link}" target="_blank" class="btn btn-register">Register Now</a>
-                  <a href="${item.calendarLink}" target="_blank" class="btn btn-cal">+ Add to Calendar</a>
+                  <a href="${item.link}" target="_blank" onclick="fetch('${apiEndpoint}?action=registration_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" class="btn btn-register">Register Now</a>
+                  <a href="${item.calendarLink}" target="_blank" onclick="fetch('${apiEndpoint}?action=calendar_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" class="btn btn-cal">+ Add to Calendar</a>
                 </div>
               </div>
             `;
           });
         })
         .catch(error => {
-          document.getElementById('loadingStatus').innerHTML = `
-            <h5 class="text-danger fw-bold">System Connection Error</h5>
-            <p class="text-muted small">Unable to retrieve active datastream. Please check database deployment accessibility settings.</p>
-          `;
-          console.error("API Fetch Error:", error);
+          document.getElementById('loadingStatus').innerHTML = `<p class="text-danger">Failed to load workshops.</p>`;
+          console.error(error);
         });
     });
 
-    /**
-     * Client-Side structural filtering. Evaluates hidden properties of cards.
-     */
     function filterList() {
       const val = document.getElementById('instFilter').value;
       const items = document.querySelectorAll('.workshop-item');
@@ -283,9 +257,8 @@
           el.style.display = 'none';
         }
       });
-
       document.getElementById('noResults').classList.toggle('d-none', found > 0);
     }
   </script>
 </body>
-</html> 
+</html>
