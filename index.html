@@ -146,9 +146,8 @@
     }
     .btn-cal:hover { background-color: #eef4fb; }
 
-    /* COMPLIANCE FIX: FOCUS VISIBLE OUTLINES (WCAG 2.1 SC 2.4.7)
-      Explicitly defines a high-contrast visual footprint for keyboard tab targeting.
-      Ensures outline indicators are vivid and completely uniform across all browsers.
+    /* COMPLIANCE FIX: HIGH-CONTRAST FOCUS INDICATORS (WCAG 2.1 SC 2.4.7)
+      Applies a bright, unmistakable yellow focus ring to elements targeted via keyboard tabbing.
     */
     a:focus-visible, 
     select:focus-visible, 
@@ -156,6 +155,21 @@
       outline: 4px solid #ffbf47 !important;
       outline-offset: 3px !important;
       box-shadow: 0 0 0 4px rgba(0, 74, 153, 0.4) !important;
+    }
+
+    /* COMPLIANCE FIX: EXPLICIT BUTTON COLOR ENFORCEMENT ON KEYBOARD FOCUS
+      Overrides default browser and Bootstrap styles to prevent text from "whitening out."
+      Forces the 'Register Now' button to adopt the official campus red theme on focus.
+    */
+    .btn-register:focus-visible {
+      background-color: var(--arc-red) !important;
+      color: white !important;
+    }
+
+    /* Forces the custom '+ Add to Calendar' button to preserve its colors on keyboard focus */
+    .btn-cal:focus-visible {
+      background-color: #eef4fb !important;
+      color: var(--arc-blue) !important;
     }
 
     @media (max-width: 768px) {
@@ -239,12 +253,6 @@
 
             const sanitizedLabel = `${item.institution} - ${item.name}`.replace(/'/g, "\\'");
 
-            /*
-              COMPLIANCE FIX: ACCESSIBLE ARIA-LABEL EXTERNAL ROUTING NOTIFICATIONS
-              Appends explicit architectural location disclosures into link labels.
-              When read by assistive tech, links now announce: 
-              "Register Now for the UC Berkeley workshop: Personal Insight Questions. Opens in a new webpage."
-            */
             listContainer.innerHTML += `
               <li class="workshop-row shadow-sm workshop-item" data-inst="${item.institution}">
                 <div class="inst-branding">
@@ -271,7 +279,7 @@
                      target="_blank" 
                      onclick="fetch('${apiEndpoint}?action=calendar_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" 
                      class="btn btn-cal"
-                     aria-label="Add to Google Calendar for the ${item.institution} workshop: ${item.name}. Opens in a new webpage.">
+                     aria-label="+ Add to Calendar for the ${item.institution} workshop: ${item.name}. Opens in a new webpage.">
                      + Add to Calendar
                   </a>
                 </div>
