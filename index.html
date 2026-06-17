@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Los Rios Transfer Center Workshop Series</title>
+  
+  <meta name="description" content="Live multi-campus directory for upcoming four-year university transfer workshops across the Los Rios Community College District. View schedules, add events to your calendar, and register directly online.">
+  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
   <style>
@@ -143,6 +146,18 @@
     }
     .btn-cal:hover { background-color: #eef4fb; }
 
+    /* COMPLIANCE FIX: FOCUS VISIBLE OUTLINES (WCAG 2.1 SC 2.4.7)
+      Explicitly defines a high-contrast visual footprint for keyboard tab targeting.
+      Ensures outline indicators are vivid and completely uniform across all browsers.
+    */
+    a:focus-visible, 
+    select:focus-visible, 
+    button:focus-visible {
+      outline: 4px solid #ffbf47 !important;
+      outline-offset: 3px !important;
+      box-shadow: 0 0 0 4px rgba(0, 74, 153, 0.4) !important;
+    }
+
     @media (max-width: 768px) {
       .workshop-row { flex-direction: column; }
       .inst-branding { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
@@ -158,34 +173,43 @@
     <div class="container">
       <img src="https://lh3.googleusercontent.com/d/1RVwQOqm0u2gHQQOnq-3-NrNJQoW41f8s" class="main-logo" alt="Los Rios Community Colleges Transfer Centers">
       <h1 class="fw-bold">Los Rios Transfer Workshop Series</h1>
-      <p class="text-muted mb-2">These workshops are meant to assist and inform students who are intending on transferring for 4-year degrees. Students can attend workshops facilitated by various universities that cover different aspects of transferring.</p>
+      
+      <p class="text-muted mb-2">These workshops are meant to assist and inform students who are intending on transferring for 4-year degrees. Students can attend workshops facilitated by various universities that cover different aspects of transferring. We encourage any student to attend and learn more about the transfer process!</p>
+
+      <p class="text-secondary small mb-3" style="font-style: italic;">
+        <strong>Note:</strong> To help us improve this resource, students may be requested to provide feedback on this page.
+      </p>
+
+      <div class="alert alert-info py-2 px-3 mx-auto d-inline-block small border-0 shadow-sm" role="note" style="max-width: 600px; border-radius: 8px;">
+         All registration and calendar links open in a new browser tab/window on an external website.
+      </div>
     </div>
   </header>
 
-  <div class="container mb-5">
+  <main class="container mb-5">
     
     <div class="filter-wrapper">
+      <label for="instFilter" class="visually-hidden">Filter workshops by hosting 4-year institution</label>
       <select id="instFilter" class="form-select shadow-sm" onchange="filterList()">
         <option value="all">View All Institutions</option>
       </select>
     </div>
 
-    <div id="loadingStatus" class="text-center py-5">
-      <div class="spinner-border text-primary mb-2" role="status"></div>
+    <div id="loadingStatus" class="text-center py-5" aria-live="polite" role="status">
+      <div class="spinner-border text-primary mb-2" role="status"><span class="visually-hidden">Loading database...</span></div>
       <p class="text-muted fw-semibold">Loading live workshop dashboard...</p>
     </div>
 
-    <div id="workshopList"></div>
+    <ul id="workshopList" class="list-unstyled" aria-label="Available upcoming transfer workshops"></ul>
 
-    <div id="noResults" class="text-center py-5 d-none">
-      <h5 class="text-muted">No workshops found for this selection.</h5>
+    <div id="noResults" class="text-center py-5 d-none" aria-live="polite" role="status">
+      <h3 class="text-muted h5">No workshops found for this selection.</h3>
     </div>
 
-  </div>
+  </main>
 
   <script>
-    // PASTE WEB APP URL DIRECTLY BELOW:
-    const apiEndpoint = "https://script.google.com/macros/s/AKfycbwWwHkQKuBzoB6g1LtunzPmVogP62naueFcsgmMbcrnBeXt8tnNGhqWxz4xX2Of2YmYLA/exec";
+    const apiEndpoint = "https://script.google.com/macros/s/AKfycbwQa9lZQny5vomKlxKJ-lREhniDRKoODB_7oKLdX-m7hF7fIQholKibx8OT1bbO8qC2/exec";
 
     document.addEventListener("DOMContentLoaded", () => {
       fetch(apiEndpoint)
@@ -210,19 +234,24 @@
 
           workshops.forEach(item => {
             let logoHTML = item.logo 
-              ? `<img src="${item.logo}" class="inst-logo-small" alt="${item.institution}">`
+              ? `<img src="${item.logo}" class="inst-logo-small" alt="${item.institution} logo asset">`
               : `<span style="font-size: 0.9rem; color: #cbd5e0; font-weight: bold;">INSTITUTION</span>`;
 
-            // Clean data string names to prevent JavaScript string breaking bugs
             const sanitizedLabel = `${item.institution} - ${item.name}`.replace(/'/g, "\\'");
 
+            /*
+              COMPLIANCE FIX: ACCESSIBLE ARIA-LABEL EXTERNAL ROUTING NOTIFICATIONS
+              Appends explicit architectural location disclosures into link labels.
+              When read by assistive tech, links now announce: 
+              "Register Now for the UC Berkeley workshop: Personal Insight Questions. Opens in a new webpage."
+            */
             listContainer.innerHTML += `
-              <div class="workshop-row shadow-sm workshop-item" data-inst="${item.institution}">
+              <li class="workshop-row shadow-sm workshop-item" data-inst="${item.institution}">
                 <div class="inst-branding">
                   <div class="logo-frame">${logoHTML}</div>
                 </div>
                 <div class="workshop-details flex-grow-1">
-                  <h4 class="workshop-title">${item.name}</h4>
+                  <h2 class="workshop-title h4">${item.name}</h2>
                   <div class="time-info">
                     ${item.timeDisplay} 
                     <span class="info-tag">Location: ${item.location}</span>
@@ -231,15 +260,27 @@
                   <p class="card-text text-secondary small mb-0">${item.desc}</p>
                 </div>
                 <div class="action-area">
-                  <a href="${item.link}" target="_blank" onclick="fetch('${apiEndpoint}?action=registration_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" class="btn btn-register">Register Now</a>
-                  <a href="${item.calendarLink}" target="_blank" onclick="fetch('${apiEndpoint}?action=calendar_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" class="btn btn-cal">+ Add to Calendar</a>
+                  <a href="${item.link}" 
+                     target="_blank" 
+                     onclick="fetch('${apiEndpoint}?action=registration_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" 
+                     class="btn btn-register"
+                     aria-label="Register Now for the ${item.institution} workshop: ${item.name}. Opens in a new webpage.">
+                     Register Now
+                  </a>
+                  <a href="${item.calendarLink}" 
+                     target="_blank" 
+                     onclick="fetch('${apiEndpoint}?action=calendar_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" 
+                     class="btn btn-cal"
+                     aria-label="Add to Google Calendar for the ${item.institution} workshop: ${item.name}. Opens in a new webpage.">
+                     + Add to Calendar
+                  </a>
                 </div>
-              </div>
+              </li>
             `;
           });
         })
         .catch(error => {
-          document.getElementById('loadingStatus').innerHTML = `<p class="text-danger">Failed to load workshops.</p>`;
+          document.getElementById('loadingStatus').innerHTML = `<p class="text-danger" role="alert">Failed to compile live workshop arrays from database source.</p>`;
           console.error(error);
         });
     });
