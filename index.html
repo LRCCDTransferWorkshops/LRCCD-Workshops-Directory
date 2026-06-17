@@ -146,9 +146,7 @@
     }
     .btn-cal:hover { background-color: #eef4fb; }
 
-    /* COMPLIANCE FIX: HIGH-CONTRAST FOCUS INDICATORS (WCAG 2.1 SC 2.4.7 )
-      Applies a bright, unmistakable yellow focus ring to elements targeted via keyboard tabbing.
-    */
+    /* COMPLIANCE FIX: HIGH-CONTRAST FOCUS INDICATORS (WCAG 2.1 SC 2.4.7) */
     a:focus-visible, 
     select:focus-visible, 
     button:focus-visible {
@@ -157,16 +155,12 @@
       box-shadow: 0 0 0 4px rgba(0, 74, 153, 0.4) !important;
     }
 
-    /* COMPLIANCE FIX: EXPLICIT BUTTON COLOR ENFORCEMENT ON KEYBOARD FOCUS 
-      Overrides default browser styles to prevent text from washing out into low contrast.
-      Forces the 'Register Now' button to switch cleanly to the official red layout state on focus.
-    */
+    /* COMPLIANCE FIX: EXPLICIT BUTTON COLOR ENFORCEMENT ON KEYBOARD FOCUS */
     .btn-register:focus-visible {
       background-color: var(--arc-red) !important;
       color: white !important;
     }
 
-    /* Forces the custom '+ Add to Calendar' button to preserve visibility configuration on keyboard focus  */
     .btn-cal:focus-visible {
       background-color: #eef4fb !important;
       color: var(--arc-blue) !important;
@@ -188,14 +182,14 @@
       <img src="https://lh3.googleusercontent.com/d/1RVwQOqm0u2gHQQOnq-3-NrNJQoW41f8s" class="main-logo" alt="Los Rios Community Colleges Transfer Centers">
       <h1 class="fw-bold">Los Rios Transfer Workshop Series</h1>
       
-      <p class="text-muted mb-2">These workshops are meant to assist and inform students who are intending on transferring for 4-year degrees. Students can attend workshops facilitated by various universities that cover different aspects of transferring. We encourage any student to attend and learn more about the transfer process! [cite: 6, 7, 8]</p>
+      <p class="text-muted mb-2">These workshops are meant to assist and inform students who are intending on transferring for 4-year degrees. Students can attend workshops facilitated by various universities that cover different aspects of transferring. We encourage any student to attend and learn more about the transfer process!</p>
 
       <p class="text-secondary small mb-3" style="font-style: italic;">
-        <strong>Note:</strong> To help us improve this resource, students may be requested to provide feedback on this page. [cite: 9]
+        <strong>Note:</strong> To help us improve this resource, students may be requested to provide feedback on this page.
       </p>
 
       <div class="alert alert-info py-2 px-3 mx-auto d-inline-block small border-0 shadow-sm" role="note" style="max-width: 600px; border-radius: 8px;">
-         All registration and calendar links open in a new browser tab/window on an external website. 
+         All registration and calendar links open in a new browser tab/window on an external website.
       </div>
     </div>
   </header>
@@ -247,48 +241,53 @@
           });
 
           workshops.forEach(item => {
+            // Defend variables against potential spreadsheet naming property variations
+            const instName = item.institution || "Institution";
+            const wName = item.name || "Transfer Workshop";
+            const wDesc = item.desc || "";
+            const wLoc = item.location || "Online";
+            const wDur = item.duration || "N/A";
+            const wTime = item.timeDisplay || "";
+            const regLink = item.link || "#";
+            const calLink = item.calendarLink || item.calLink || item.calendar || "#";
+
             let logoHTML = item.logo 
-              ? `<img src="${item.logo}" class="inst-logo-small" alt="${item.institution} logo asset">` [cite: 55]
+              ? `<img src="${item.logo}" class="inst-logo-small" alt="${instName} logo asset">`
               : `<span style="font-size: 0.9rem; color: #cbd5e0; font-weight: bold;">INSTITUTION</span>`;
 
-            const sanitizedLabel = `${item.institution} - ${item.name}`.replace(/'/g, "\\'");
+            const sanitizedLabel = `${instName} - ${wName}`.replace(/'/g, "\\'");
 
             /*
-              COMPLIANCE FIX: HEADING HIERARCHY SEQUENCE [cite: 331, 509]
-              Uses an <h2> tag so that the document reads linearly from <h1> directly to <h2>[cite: 331, 509]. 
-              Uses Bootstrap utility class 'h4' to ensure visual scale remains untouched.
-
-              COMPLIANCE FIX: ACCESSIBLE ARIA-LABEL PREFIXES (WCAG 2.1 SC 2.5.3)
-              Preserves word-for-word string match alignment checking for button content labels 
-              ("+ Add to Calendar" and "Register Now") while appending context definitions safely.
+              COMPLIANCE FIX: HEADING HIERARCHY SEQUENCE (<h2>) & ACCESSIBLE ARIA-LABEL MATCHING (+ Add to Calendar)
+              Cleans up the inline string template interpolation to avoid triggering unexpected syntax token breaks.
             */
             listContainer.innerHTML += `
-              <li class="workshop-row shadow-sm workshop-item" data-inst="${item.institution}">
+              <li class="workshop-row shadow-sm workshop-item" data-inst="${instName}">
                 <div class="inst-branding">
                   <div class="logo-frame">${logoHTML}</div>
                 </div>
                 <div class="workshop-details flex-grow-1">
-                  <h2 class="workshop-title h4">${item.name}</h2> [cite: 50]
+                  <h2 class="workshop-title h4">${wName}</h2>
                   <div class="time-info">
-                    ${item.timeDisplay} [cite: 52]
-                    <span class="info-tag">Location: ${item.location}</span> [cite: 54]
-                    <span class="info-tag">Duration: ${item.duration}</span> [cite: 59]
+                    ${wTime}
+                    <span class="info-tag">Location: ${wLoc}</span>
+                    <span class="info-tag">Duration: ${wDur}</span>
                   </div>
-                  <p class="card-text text-secondary small mb-0">${item.desc}</p>
+                  <p class="card-text text-secondary small mb-0">${wDesc}</p>
                 </div>
                 <div class="action-area">
-                  <a href="${item.link}" [cite: 51]
+                  <a href="${regLink}"
                      target="_blank" 
                      onclick="fetch('${apiEndpoint}?action=registration_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" 
                      class="btn btn-register"
-                     aria-label="Register Now for the ${item.institution} workshop: ${item.name}. Opens in a new webpage.">
+                     aria-label="Register Now for the ${instName} workshop: ${wName}. Opens in a new webpage.">
                      Register Now
                   </a>
-                  <a href="${item.calendarLink}" 
+                  <a href="${calLink}" 
                      target="_blank" 
                      onclick="fetch('${apiEndpoint}?action=calendar_click&detail=${encodeURIComponent(sanitizedLabel)}', {mode: 'no-cors'})" 
                      class="btn btn-cal"
-                     aria-label="+ Add to Calendar for the ${item.institution} workshop: ${item.name}. Opens in a new webpage.">
+                     aria-label="+ Add to Calendar for the ${instName} workshop: ${wName}. Opens in a new webpage.">
                      + Add to Calendar
                   </a>
                 </div>
@@ -296,7 +295,7 @@
             `;
           });
 
-          /* COMPLIANCE REVEAL: Unhides container only when child entries exist  */
+          /* COMPLIANCE REVEAL: Unhides container only when child entries exist */
           listContainer.classList.remove('d-none');
         })
         .catch(error => {
